@@ -35,7 +35,7 @@ DEFAULT_FORMATS = dict(html='png', latex='png', text=None)
 
 
 def get_hashid(text,options):
-    hashkey = text.encode('utf-8') + str(options)
+    hashkey = (text + str(options)).encode('utf-8')
     hashid = sha(hashkey).hexdigest()
     return hashid
 
@@ -120,7 +120,11 @@ def render_gnuplot(app, text, options):
 
     docdir = (path.dirname(app.builder.env.docname))
     try:
-        plot = Popen('gnuplot -persist', shell=True, bufsize=64, stdin=PIPE)
+        try:
+            plot = Popen('gnuplot -persist', shell=True, bufsize=64, 
+                         stdin=PIPE,encoding="utf-8")
+        except TypeError as e:
+            plot = Popen('gnuplot -persist', shell=True, bufsize=64, stdin=PIPE)
         if docdir:
             plot.stdin.write('cd "%s"\n' % docdir)
         plot.stdin.write("set terminal %s " % (term,))
